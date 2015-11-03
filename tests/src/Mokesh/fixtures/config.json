@@ -1,0 +1,10 @@
+{
+    "general" : {
+        "debug" : "true",
+        "connections" : 1000
+    },
+    "log" : {
+        "filename" : "my-%ENV%.log",
+        "level" : ["INFO", "DEBUG"]
+    } 
+}

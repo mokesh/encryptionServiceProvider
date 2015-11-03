@@ -1,0 +1,18 @@
+{
+    "name": "mokesh/encryption-service-provider",
+    "description": "An encryption service provider for silex Framework",
+    "keywords": ["encryption", "service", "silex"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mukesh Sharma",
+            "email": "cogentmukesh@gmail.com"
+        }
+    ],
+    "require": {
+        "silex/silex": "~1.0"
+    },
+    "autoload": {
+        "psr-4": { "Mokesh\\": "src/Mokesh" }
+    }
+}
