@@ -18,7 +18,7 @@ namespace Mokesh;
  * @since  Mon Nov  2 23:07:37 IST 2015
  * @package Mokesh
  */
-trait MonologTrait
+trait EncryptionTrait
 {
     /**
      * Encrypt the supplied data using the supplied key
