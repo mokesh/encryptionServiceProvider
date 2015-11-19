@@ -69,6 +69,8 @@ class Encryption
      */
     public function decrypt($data, $key) 
     {
+        $data = $this->decode_base64($data);
+
         $salt = substr($data, 0, 128);
         $enc = substr($data, 128, -64);
         $mac = substr($data, -64);
@@ -104,7 +106,7 @@ class Encryption
         $enc = mcrypt_encrypt($this->cipher, $cipherKey, $data, $this->mode, $iv);
 
         $mac = hash_hmac('sha512', $enc, $macKey, true);
-        return $salt . $enc . $mac;
+        return $this->encode_base64($salt . $enc . $mac);
     }
 
     /**
@@ -178,6 +180,16 @@ class Encryption
             return false;
         }
         return substr($data, 0, -1 * $last);
+    }
+    
+    public function encode_base64($data) {
+        $sBase64 = base64_encode($data);
+        return str_replace('=', '', strtr($sBase64, '+/', '-_'));
+    }
+
+    public function decode_base64($data) {
+        $sBase64 = strtr($data, '-_', '+/');
+        return base64_decode($sBase64 . '==');
     }
 }
 

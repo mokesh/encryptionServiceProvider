@@ -23,8 +23,9 @@ use Silex\ServiceProviderInterface;
  */
 class EncryptionServiceProvider implements ServiceProviderInterface
 {
-    const DEFAULT_CRYPT_CIPHER  = MCRYPT_RIJNDAEL_256;
-    const DEFAULT_CRYPT_MODE    = MCRYPT_MODE_CBC;
+    const DEFAULT_CRYPT_CIPHER  = MCRYPT_RIJNDAEL_128;
+    const DEFAULT_CRYPT_MODE    = MCRYPT_MODE_ECB;
+
 
     public function register(Application $app)
     {
