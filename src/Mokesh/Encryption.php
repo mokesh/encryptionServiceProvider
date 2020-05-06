@@ -69,6 +69,7 @@ class Encryption
      */
     public function decrypt($data, $key) 
     {
+
         $data = $this->decode_base64($data);
 
         $salt = substr($data, 0, 128);
@@ -80,11 +81,9 @@ class Encryption
         if (!hash_equals(hash_hmac('sha512', $enc, $macKey, true), $mac)) {
             return false;
         }
-
-        $dec = mcrypt_decrypt($this->cipher, $cipherKey, $enc, $this->mode, $iv);
-
+        
+        $dec = openssl_decrypt($enc, 'AES-256-ECB', $cipherKey, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING);
         $data = $this->unpad($dec);
-
         return $data;
     }
 
@@ -98,13 +97,12 @@ class Encryption
      */
     public function encrypt($data, $key) 
     {
-        $salt = mcrypt_create_iv(128, MCRYPT_DEV_URANDOM);
+        $salt = openssl_random_pseudo_bytes(128);
         list ($cipherKey, $macKey, $iv) = $this->getKeys($salt, $key);
 
         $data = $this->pad($data);
 
-        $enc = mcrypt_encrypt($this->cipher, $cipherKey, $data, $this->mode, $iv);
-
+        $enc = openssl_encrypt($data,'AES-256-ECB', $cipherKey, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING);
         $mac = hash_hmac('sha512', $enc, $macKey, true);
         return $this->encode_base64($salt . $enc . $mac);
     }
@@ -119,8 +117,11 @@ class Encryption
      */
     protected function getKeys($salt, $key) 
     {
-        $ivSize = mcrypt_get_iv_size($this->cipher, $this->mode);
-        $keySize = mcrypt_get_key_size($this->cipher, $this->mode);
+        //Using CBC mode in calculating cipher IV length just to keep it consistent with previous version, as ECB mode doesn't use IV 
+        $ivSize =  openssl_cipher_iv_length('AES-256-CBC');
+        
+        // hardcoding the key size wrt the CIPHER AES-256-ECB
+        $keySize = 32;
         $length = 2 * $keySize + $ivSize;
 
         $key = $this->pbkdf2('sha512', $key, $salt, $this->rounds, $length);
@@ -163,7 +164,9 @@ class Encryption
 
     protected function pad($data) 
     {
-        $length = mcrypt_get_block_size($this->cipher, $this->mode);
+        //Using CBC mode in calculating cipher IV length just to keep it consistent with previous version, as ECB mode doesn't use IV
+        $length = openssl_cipher_iv_length('AES-256-CBC');
+        
         $padAmount = $length - strlen($data) % $length;
         if ($padAmount == 0) {
             $padAmount = $length;
@@ -173,7 +176,9 @@ class Encryption
 
     protected function unpad($data) 
     {
-        $length = mcrypt_get_block_size($this->cipher, $this->mode);
+        //Using CBC mode in calculating cipher IV length just to keep it consistent with previous version, as ECB mode doesn't use IV
+        $length = openssl_cipher_iv_length('AES-256-CBC');
+        
         $last = ord($data[strlen($data) - 1]);
         if ($last > $length) return false;
         if (substr($data, -1 * $last) !== str_repeat(chr($last), $last)) {
